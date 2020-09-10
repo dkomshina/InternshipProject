@@ -59,15 +59,15 @@ public class ControllerForPOJO {
     @PutMapping(value = "/pojos/{id}")
     public ResponseEntity<?> update(@PathVariable(name = "id") int id,
                                     @RequestBody POJO planJavaObject) {
-        if (serviceForPOJO.update(planJavaObject, id)){
+        if (serviceForPOJO.update(planJavaObject, id)) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
 
     @DeleteMapping(value = "/pojos/{id}")
-    public ResponseEntity<?> delete(@PathVariable(name = "id") int id){
-        if(serviceForPOJO.delete(id)){
+    public ResponseEntity<?> delete(@PathVariable(name = "id") int id) {
+        if (serviceForPOJO.delete(id)) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);

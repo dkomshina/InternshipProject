@@ -36,7 +36,7 @@ public class ServiceForPOJOImplementation implements ServiceForPOJO {
 
     @Override
     public boolean update(POJO plainOldJavaObject, int id) {
-        if(REPOSITORY.containsKey(id)){
+        if (REPOSITORY.containsKey(id)) {
             plainOldJavaObject.setId(id);
             REPOSITORY.put(id, plainOldJavaObject);
             return true;

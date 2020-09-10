@@ -27,16 +27,16 @@ public interface ServiceForPOJO {
 
     /**
      * @param plainOldJavaObject - according to this POJO the data is updated
-     * @param id - POJO id to update
+     * @param id                 - POJO id to update
      * @return - true if data has beet updated
-     *         - false if not
+     * - false if not
      */
     boolean update(POJO plainOldJavaObject, int id);
 
     /**
      * @param id - POJO id to delete
      * @return - true if POJO has been deleted
-     *         - false if not
+     * - false if not
      */
     boolean delete(int id);
 }
