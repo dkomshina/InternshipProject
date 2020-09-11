@@ -1,7 +1,8 @@
-package sberbank.internship.dkomshina.service;
+package sberbank.internship.dkomshina.service.impl;
 
 import org.springframework.stereotype.Service;
 import sberbank.internship.dkomshina.model.POJO;
+import sberbank.internship.dkomshina.service.ServiceForPOJO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
