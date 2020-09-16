@@ -1,23 +1,39 @@
 package sberbank.internship.dkomshina.model;
 
-import org.springframework.data.domain.AbstractAggregateRoot;
+import jdk.jfr.DataAmount;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 
+import java.util.Date;
 import java.util.Set;
 
 @Entity
-@Table(name="task")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Task {
-
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @Column(name = "name")
-    private String name;
 
     @OneToMany
     private Set<Stage> stage;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
+
+    private String description;
+
+    private String name;
+
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    private Date createTime;
+
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    private Date startTime;
+
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    private Date endTime;
 }

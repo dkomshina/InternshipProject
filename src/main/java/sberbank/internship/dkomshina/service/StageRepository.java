@@ -7,5 +7,4 @@ import sberbank.internship.dkomshina.model.Stage;
 import java.util.Optional;
 
 public interface StageRepository extends JpaRepository<Stage, Long> {
-
 }

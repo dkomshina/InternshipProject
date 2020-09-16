@@ -2,6 +2,7 @@ package sberbank.internship.dkomshina.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sberbank.internship.dkomshina.model.Task;
@@ -19,23 +20,23 @@ public class TaskController {
         this.taskRepository = taskRepository;
     }
 
-    @PostMapping(value = "/tasks")
+    @PostMapping(value = "/tasks/post")
     public ResponseEntity<?> saveTask(@RequestBody Task task) {
         taskRepository.save(task);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/tasks")
+    @GetMapping(value = "/tasks/get")
     public ResponseEntity<List<Task>> getAllTasks() {
         List<Task> tasks = taskRepository.findAll();
-        if (tasks != null && !tasks.isEmpty()) {
+        if (!tasks.isEmpty()) {
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(value = "/tasks/{id}")
-    public ResponseEntity<Task> findTaskById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<Task> getTaskById(@PathVariable(name = "id") Long id) {
         Optional<Task> task = taskRepository.findById(id);
         return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
