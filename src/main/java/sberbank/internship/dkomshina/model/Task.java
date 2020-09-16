@@ -1,6 +1,5 @@
 package sberbank.internship.dkomshina.model;
 
-import jdk.jfr.DataAmount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +7,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
@@ -17,8 +17,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class Task {
 
-    @OneToMany
-    private Set<Stage> stage;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "taskId")
+    private List<Stage> stages;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -36,4 +36,11 @@ public class Task {
 
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date endTime;
+
+//    public void addStage(Stage stage) {
+//        if (stages != null) {
+//            stages = new ArrayList<>();
+//        }
+//        stages.add(stage);
+//    }
 }

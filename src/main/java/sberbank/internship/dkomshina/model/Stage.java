@@ -14,12 +14,15 @@ import java.util.Date;
 @NoArgsConstructor
 public class Stage {
 
-    @ManyToOne
-    private Task task;
+//    @ManyToOne
+//    private Task task;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @Column(name = "task_id")
+    private Long taskId;
 
     private String name;
 
