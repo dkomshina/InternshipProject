@@ -5,47 +5,50 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sberbank.internship.dkomshina.model.Task;
-import sberbank.internship.dkomshina.service.TaskRepository;
+import sberbank.internship.dkomshina.repository.TaskRepository;
+import sberbank.internship.dkomshina.service.TaskService;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/api/tasks")
 public class TaskController {
 
-    private final TaskRepository taskRepository;
+    private final TaskService taskService;
 
     @Autowired
-    public TaskController(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
     }
 
-    @RequestMapping(value = "/post", method = RequestMethod.POST)
-    public ResponseEntity<Task> postTask(@RequestBody Task task) {
-        taskRepository.save(task);
-        return new ResponseEntity<>(task, HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+        return new ResponseEntity<>(taskService.addTask(task), HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/get", method = RequestMethod.GET)
-    public ResponseEntity<List<Task>> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
+    @GetMapping
+    public ResponseEntity<List<Task>> getTasks() {
+        List<Task> tasks = taskService.findAllTasks();
         if (!tasks.isEmpty()) {
             return new ResponseEntity<>(tasks, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public ResponseEntity<Task> getTaskById(@PathVariable(name = "id") Long id) {
-        Optional<Task> task = taskRepository.findById(id);
+    @GetMapping(value = "/{taskId}")
+    public ResponseEntity<Task> getTaskById(@PathVariable Long taskId) {
+        Optional<Task> task = taskService.findTaskById(taskId);
         return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable(name = "id") Long id) {
-        taskRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @DeleteMapping(value = "/{taskId}")
+    public ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
+        if (taskService.deleteTask(taskId)) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

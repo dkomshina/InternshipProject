@@ -1,28 +1,30 @@
 package sberbank.internship.dkomshina.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Data
-@AllArgsConstructor
+@ToString(exclude = "task")
+@EqualsAndHashCode(exclude = "task")
 @NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Stage {
 
-//    @ManyToOne
-//    private Task task;
+    //(fetch = FetchType.EAGER)
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
-
-    @Column(name = "task_id")
-    private Long taskId;
 
     private String name;
 
@@ -32,9 +34,13 @@ public class Stage {
 
     private String description;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date startTime;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date endTime;
+
+//
+//    @Column(name = "task_id")
+//    private Long taskId;
 }

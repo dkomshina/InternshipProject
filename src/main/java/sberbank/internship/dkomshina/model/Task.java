@@ -1,5 +1,9 @@
 package sberbank.internship.dkomshina.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +11,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,9 +18,11 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Task {
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "taskId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task")
+    @JsonBackReference
     private List<Stage> stages;
 
     @Id
@@ -28,13 +33,13 @@ public class Task {
 
     private String name;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date createTime;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date startTime;
 
-    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date endTime;
 
 //    public void addStage(Stage stage) {
