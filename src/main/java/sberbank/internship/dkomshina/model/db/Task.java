@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.*;
 
@@ -15,9 +16,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@NonNull
 public class Task {
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "task", fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Stage> stages = new ArrayList<>();
 
     @Id
@@ -38,11 +40,4 @@ public class Task {
 
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date endTime;
-
-//    public void addStage(Stage stage) {
-//        if (stages != null) {
-//            stages = new ArrayList<>();
-//        }
-//        stages.add(stage);
-//    }
 }

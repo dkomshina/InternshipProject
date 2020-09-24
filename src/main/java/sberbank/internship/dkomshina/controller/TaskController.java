@@ -2,7 +2,6 @@ package sberbank.internship.dkomshina.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sberbank.internship.dkomshina.mapper.TaskStageMapper;
@@ -28,8 +27,8 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskDto> createTask(@RequestBody Task task) {
-        return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(task)), HttpStatus.CREATED);
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto){
+        return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper.map(taskDto))), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -46,8 +45,7 @@ public class TaskController {
 
     @PutMapping(value = "/{taskId}")
     public ResponseEntity<TaskDto> updateTask(@PathVariable Long taskId, @RequestBody Task requestTask) {
-        return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper
-                .map(taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new), requestTask))), HttpStatus.OK);
+        return new ResponseEntity<>(taskStageMapper.map(taskStageMapper.map(taskRepository.save(taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new)), requestTask)), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{taskId}")

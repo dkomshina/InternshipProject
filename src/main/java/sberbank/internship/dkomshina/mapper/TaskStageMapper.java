@@ -15,13 +15,8 @@ public class TaskStageMapper {
 
         TaskDto taskDto = new TaskDto();
         taskDto.setId(task.getId());
-        taskDto.setDescription(task.getName());
+        taskDto.setDescription(task.getDescription());
         taskDto.setName(task.getName());
-//        task.getStages().forEach(e -> {
-//            StageDto stageDto = new StageDto();
-//            stageDto.setId(e.getId());
-//            taskDto.getStages().add(stageDto);
-//        });
         taskDto.setStages(task.getStages().stream().map(this::map).collect(Collectors.toList()));
         return taskDto;
     }
@@ -32,7 +27,7 @@ public class TaskStageMapper {
         task.setName(taskDto.getName());
         task.setDescription(taskDto.getDescription());
         task.setStages(taskDto.getStages().stream().map(this::map).collect(Collectors.toList()));
-        return new Task();
+        return task;
     }
 
     public Task map(Task task, Task taskMappedTo) {
@@ -49,7 +44,7 @@ public class TaskStageMapper {
         stageDto.setDescription(stage.getDescription());
         stageDto.setStatus(stage.getStatus());
         stageDto.setScript(stage.getScript());
-        stageDto.setTask(stage.getTask());
+        stageDto.setTaskId(stage.getTaskId());
         return stageDto;
     }
 
@@ -60,7 +55,7 @@ public class TaskStageMapper {
         stage.setDescription(stageDto.getDescription());
         stage.setStatus(stageDto.getStatus());
         stage.setScript(stageDto.getScript());
-        stage.setTask(stageDto.getTask());
+        stage.setTaskId(stageDto.getTaskId());
         return stage;
     }
 
@@ -69,7 +64,7 @@ public class TaskStageMapper {
         stage.setDescription(stageMappedTo.getDescription());
         stage.setStatus(stageMappedTo.getStatus());
         stage.setScript(stageMappedTo.getScript());
-        stage.setTask(stageMappedTo.getTask());
+        stage.setTaskId(stageMappedTo.getTaskId());
         return stage;
     }
 }

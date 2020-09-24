@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sberbank.internship.dkomshina.mapper.TaskStageMapper;
 import sberbank.internship.dkomshina.model.db.Stage;
-import sberbank.internship.dkomshina.model.db.Task;
 import sberbank.internship.dkomshina.model.json.resp.StageDto;
+import sberbank.internship.dkomshina.model.json.resp.TaskDto;
 import sberbank.internship.dkomshina.repository.StageRepository;
 import sberbank.internship.dkomshina.repository.TaskRepository;
 
@@ -30,22 +30,22 @@ public class StageController {
     }
 
     @PostMapping
-    public ResponseEntity<StageDto> createStage(@RequestBody Stage stage, @PathVariable Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new);
-        stage.setTask(task);
-        task.getStages().add(stage);
-        return new ResponseEntity<>(taskStageMapper.map(stageRepository.save(stage)), HttpStatus.CREATED);
+    public ResponseEntity<StageDto> createStage(@RequestBody StageDto stageDto, @PathVariable Long taskId) {
+        TaskDto taskDto = taskStageMapper.map(taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new));
+        taskDto.getStages().add(stageDto);
+        stageDto.setTaskId(taskId);
+        return new ResponseEntity<>(taskStageMapper.map(stageRepository.save(taskStageMapper.map(stageDto))), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<StageDto>> getStages(@PathVariable Long taskId) {
-        return new ResponseEntity<>(stageRepository.findByTaskId(taskId).stream()
+        return new ResponseEntity<>(stageRepository.findAllByTaskId(taskId).stream()
                 .map(taskStageMapper::map).collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{stageId}")
     public ResponseEntity<StageDto> getStageById(@PathVariable Long taskId, @PathVariable Long stageId) {
-        return new ResponseEntity<>(taskStageMapper.map(stageRepository.findStageByTaskIdAndId(taskId, stageId)
+        return new ResponseEntity<>(taskStageMapper.map(stageRepository.findByTaskIdAndId(taskId, stageId)
                 .orElseThrow(NoSuchElementException::new)), HttpStatus.OK);
     }
 
@@ -53,12 +53,12 @@ public class StageController {
     public ResponseEntity<StageDto> updateStage(
             @PathVariable Long taskId, @PathVariable Long stageId, @RequestBody Stage stageRequest) {
         return new ResponseEntity<>(taskStageMapper.map(stageRepository.save(taskStageMapper
-                        .map(stageRepository.findStageByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new), stageRequest))), HttpStatus.OK);
+                .map(stageRepository.findByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new), stageRequest))), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{stageId}")
     public ResponseEntity<?> deleteStage(@PathVariable Long taskId, @PathVariable Long stageId) {
-        stageRepository.delete(stageRepository.findStageByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new));
+        stageRepository.delete(stageRepository.findByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
