@@ -13,7 +13,6 @@ import sberbank.internship.dkomshina.repository.TaskRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,7 +30,7 @@ public class StageController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createStage(@RequestBody Stage stage, @PathVariable Long taskId) {
+    public ResponseEntity<StageDto> createStage(@RequestBody Stage stage, @PathVariable Long taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new);
         stage.setTask(task);
         task.getStages().add(stage);
@@ -40,34 +39,26 @@ public class StageController {
 
     @GetMapping
     public ResponseEntity<List<StageDto>> getStages(@PathVariable Long taskId) {
-        List<StageDto> stages = stageRepository.findAll().stream().map(taskStageMapper::map).collect(Collectors.toList());
-        if (!stages.isEmpty()) {
-            return new ResponseEntity<>(stages, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(stageRepository.findByTaskId(taskId).stream()
+                .map(taskStageMapper::map).collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{stageId}")
-    public ResponseEntity<Stage> getStageById(@PathVariable Long taskId, @PathVariable Long stageId) {
-        Optional<Stage> stage = stageRepository.findStageById(taskId, stageId);
-        return stage.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<StageDto> getStageById(@PathVariable Long taskId, @PathVariable Long stageId) {
+        return new ResponseEntity<>(taskStageMapper.map(stageRepository.findStageByTaskIdAndId(taskId, stageId)
+                .orElseThrow(NoSuchElementException::new)), HttpStatus.OK);
     }
 
     @PutMapping(value = "/{stageId}")
-    public ResponseEntity<Stage> updateStage(
+    public ResponseEntity<StageDto> updateStage(
             @PathVariable Long taskId, @PathVariable Long stageId, @RequestBody Stage stageRequest) {
-        Optional<Stage> stage = stageRepository.updateStage(taskId, stageId, stageRequest);
-        return stage.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return new ResponseEntity<>(taskStageMapper.map(stageRepository.save(taskStageMapper
+                        .map(stageRepository.findStageByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new), stageRequest))), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{stageId}")
     public ResponseEntity<?> deleteStage(@PathVariable Long taskId, @PathVariable Long stageId) {
-        if (stageRepository.deleteStage(taskId, stageId)) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        stageRepository.delete(stageRepository.findStageByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -35,6 +35,13 @@ public class TaskStageMapper {
         return new Task();
     }
 
+    public Task map(Task task, Task taskMappedTo) {
+        task.setName(taskMappedTo.getName());
+        task.setDescription(taskMappedTo.getDescription());
+        task.setStages(taskMappedTo.getStages());
+        return task;
+    }
+
     public StageDto map(Stage stage) {
         StageDto stageDto = new StageDto();
         stageDto.setId(stage.getId());
@@ -54,6 +61,15 @@ public class TaskStageMapper {
         stage.setStatus(stageDto.getStatus());
         stage.setScript(stageDto.getScript());
         stage.setTask(stageDto.getTask());
+        return stage;
+    }
+
+    public Stage map(Stage stage, Stage stageMappedTo) {
+        stage.setName(stageMappedTo.getName());
+        stage.setDescription(stageMappedTo.getDescription());
+        stage.setStatus(stageMappedTo.getStatus());
+        stage.setScript(stageMappedTo.getScript());
+        stage.setTask(stageMappedTo.getTask());
         return stage;
     }
 }
