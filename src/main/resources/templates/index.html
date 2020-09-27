@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<title>The best soft</title>
+<body>
+
+<form name="createTask">
+    <label for="name">Name:</label>
+    <input type="text" name="name" id="name">
+    <br/>
+    <label for="description">Description:</label>
+    <input type="text" name="description" id="description">
+    <br/>
+    <a href="#" onclick="create()">CreateTask</a>
+</form>
+<div id="tasks"></div>
+<script>
+
+    document.addEventListener("DOMContentLoaded", () => getTasks());
+
+    function getTasks() {
+        get("/api/tasks")
+            .then(resp => resp.json())
+            .then(tasks => {
+                let tasksContainer = document.querySelector("#tasks");
+                tasks && tasks.map(task => {
+                    tasksContainer.insertAdjacentHTML('beforeend',
+                        `<p>Name: ${task.name}</p>`
+                        + `<p>Description: ${task.description}</p><br/>`
+                    );
+                });
+            })
+    }
+
+    function create() {
+        let name = document.querySelector("#name").value;
+        let description = document.querySelector("#description").value;
+        let task = {
+            name: name,
+            description: description
+        };
+        post("/api/tasks", task)
+            .then(() => {
+                let tasksContainer = document.querySelector("#tasks");
+                tasksContainer.insertAdjacentHTML('beforeend',
+                    `<p>Name: ${task.name}</p>`
+                    + `<p>Description: ${task.description}</p><br/>`
+                );
+            })
+            .catch(() => console.log("error"));
+    }
+
+    async function post(url, body) {
+        return await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(body)
+        })
+    }
+
+    async function get(url) {
+        return await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            }
+        })
+    }
+</script>
+</body>
+</html>
