@@ -8,6 +8,7 @@ import sberbank.internship.dkomshina.mapper.TaskStageMapper;
 import sberbank.internship.dkomshina.model.db.Task;
 import sberbank.internship.dkomshina.model.json.resp.TaskDto;
 import sberbank.internship.dkomshina.repository.TaskRepository;
+import sberbank.internship.dkomshina.service.TaskStageService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,21 +20,24 @@ public class TaskController {
 
     private final TaskRepository taskRepository;
     private final TaskStageMapper taskStageMapper;
+    private final TaskStageService taskStageService;
 
     @Autowired
-    public TaskController(TaskRepository taskRepository, TaskStageMapper taskStageMapper) {
+    public TaskController(TaskRepository taskRepository, TaskStageMapper taskStageMapper, TaskStageService taskStageService) {
         this.taskRepository = taskRepository;
         this.taskStageMapper = taskStageMapper;
+        this.taskStageService = taskStageService;
     }
 
     //сделать старт и стоп
-    @PostMapping
-    public ResponseEntity<?> startTask(){
-        
+    @PostMapping(value = "{taskId}/start")
+    public ResponseEntity<?> startTask(@PathVariable Long taskId) {
+        taskStageService.startTask(taskId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto){
+    public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto) {
         return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper.map(taskDto))), HttpStatus.CREATED);
     }
 
