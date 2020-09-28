@@ -49,6 +49,7 @@ public class StageController {
                 .orElseThrow(NoSuchElementException::new)), HttpStatus.OK);
     }
 
+
     @PutMapping(value = "/{stageId}")
     public ResponseEntity<StageDto> updateStage(
             @PathVariable Long taskId, @PathVariable Long stageId, @RequestBody Stage stageRequest) {

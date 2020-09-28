@@ -26,6 +26,12 @@ public class TaskController {
         this.taskStageMapper = taskStageMapper;
     }
 
+    //сделать старт и стоп
+    @PostMapping
+    public ResponseEntity<?> startTask(){
+        
+    }
+
     @PostMapping
     public ResponseEntity<TaskDto> createTask(@RequestBody TaskDto taskDto){
         return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper.map(taskDto))), HttpStatus.CREATED);
