@@ -53,7 +53,7 @@ public class TaskStageMapper {
         stageDto.setDescription(stage.getDescription());
         stageDto.setStatus(stage.getStatus());
         stageDto.setScript(stage.getScript());
-        stageDto.setTaskId(stage.getTaskId());
+        stageDto.setTaskId(stage.getTask().getId());
         stageDto.setStartTime(stage.getStartTime());
         stageDto.setEndTime(stage.getEndTime());
         return stageDto;
@@ -66,7 +66,6 @@ public class TaskStageMapper {
         stage.setDescription(stageDto.getDescription());
         stage.setStatus(stageDto.getStatus());
         stage.setScript(stageDto.getScript());
-        stage.setTaskId(stageDto.getTaskId());
         stage.setStartTime(stageDto.getStartTime());
         stage.setEndTime(stageDto.getEndTime());
         return stage;

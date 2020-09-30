@@ -102,10 +102,12 @@ public class TaskStageService {
     }
 
     public ResponseEntity<StageDto> createStage(StageDto stageDto, Long taskId) {
-        TaskDto taskDto = taskStageMapper.map(taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new));
-        taskDto.getStages().add(stageDto);
-        stageDto.setTaskId(taskId);
-        return new ResponseEntity<>(taskStageMapper.map(stageRepository.save(taskStageMapper.map(stageDto))), HttpStatus.CREATED);
+        final Task task = taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new);
+        final Stage stage = taskStageMapper.map(stageDto);
+        stage.setTask(task);
+        task.getStages().add(stage);
+        taskRepository.save(task);
+        return new ResponseEntity<>(taskStageMapper.map(stage), HttpStatus.CREATED);
     }
 
     public ResponseEntity<List<StageDto>> getStages(Long taskId) {
