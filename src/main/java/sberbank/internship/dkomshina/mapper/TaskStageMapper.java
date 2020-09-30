@@ -18,6 +18,9 @@ public class TaskStageMapper {
         taskDto.setDescription(task.getDescription());
         taskDto.setName(task.getName());
         taskDto.setStages(task.getStages().stream().map(this::map).collect(Collectors.toList()));
+        taskDto.setStartTime(task.getStartTime());
+        taskDto.setEndTime(task.getEndTime());
+        taskDto.setCreateTime(task.getCreateTime());
         return taskDto;
     }
 
@@ -27,13 +30,19 @@ public class TaskStageMapper {
         task.setName(taskDto.getName());
         task.setDescription(taskDto.getDescription());
         task.setStages(taskDto.getStages().stream().map(this::map).collect(Collectors.toList()));
+        task.setStartTime(taskDto.getStartTime());
+        task.setEndTime(taskDto.getEndTime());
+        task.setCreateTime(taskDto.getCreateTime());
         return task;
     }
 
-    public Task map(Task task, Task taskMappedTo) {
+    public Task map(Task task, TaskDto taskMappedTo) {
         task.setName(taskMappedTo.getName());
         task.setDescription(taskMappedTo.getDescription());
-        task.setStages(taskMappedTo.getStages());
+        task.setStages(taskMappedTo.getStages().stream().map(this::map).collect(Collectors.toList()));
+        task.setStartTime(taskMappedTo.getStartTime());
+        task.setEndTime(taskMappedTo.getEndTime());
+        task.setCreateTime(taskMappedTo.getCreateTime());
         return task;
     }
 
@@ -45,6 +54,8 @@ public class TaskStageMapper {
         stageDto.setStatus(stage.getStatus());
         stageDto.setScript(stage.getScript());
         stageDto.setTaskId(stage.getTaskId());
+        stageDto.setStartTime(stage.getStartTime());
+        stageDto.setEndTime(stage.getEndTime());
         return stageDto;
     }
 
@@ -56,15 +67,18 @@ public class TaskStageMapper {
         stage.setStatus(stageDto.getStatus());
         stage.setScript(stageDto.getScript());
         stage.setTaskId(stageDto.getTaskId());
+        stage.setStartTime(stageDto.getStartTime());
+        stage.setEndTime(stageDto.getEndTime());
         return stage;
     }
 
-    public Stage map(Stage stage, Stage stageMappedTo) {
+    public Stage map(Stage stage, StageDto stageMappedTo) {
         stage.setName(stageMappedTo.getName());
         stage.setDescription(stageMappedTo.getDescription());
         stage.setStatus(stageMappedTo.getStatus());
         stage.setScript(stageMappedTo.getScript());
-        stage.setTaskId(stageMappedTo.getTaskId());
+        stage.setStartTime(stageMappedTo.getStartTime());
+        stage.setEndTime(stageMappedTo.getEndTime());
         return stage;
     }
 }

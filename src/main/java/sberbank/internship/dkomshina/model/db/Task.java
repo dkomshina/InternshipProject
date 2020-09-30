@@ -19,7 +19,7 @@ import java.util.List;
 @NonNull
 public class Task {
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Stage> stages = new ArrayList<>();
 
     @Id

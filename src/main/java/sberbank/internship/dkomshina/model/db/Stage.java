@@ -2,7 +2,6 @@ package sberbank.internship.dkomshina.model.db;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,10 +26,10 @@ public class Stage {
 
     private String description;
 
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss:SSS")
     private Date startTime;
 
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss:SSS")
     private Date endTime;
 
     @Column(name = "task_id")
