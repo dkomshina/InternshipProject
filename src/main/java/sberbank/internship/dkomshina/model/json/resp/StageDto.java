@@ -15,5 +15,5 @@ public class StageDto {
     private String description;
     private Date startTime;
     private Date endTime;
-    private Long taskId;
+    private TaskDto task;
 }
