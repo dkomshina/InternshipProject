@@ -1,9 +1,11 @@
 package sberbank.internship.dkomshina.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import sberbank.internship.dkomshina.event.TaskStartedEvent;
 import sberbank.internship.dkomshina.mapper.TaskStageMapper;
 import sberbank.internship.dkomshina.model.db.Stage;
 import sberbank.internship.dkomshina.model.db.Task;
@@ -12,6 +14,7 @@ import sberbank.internship.dkomshina.model.json.resp.TaskDto;
 import sberbank.internship.dkomshina.repository.StageRepository;
 import sberbank.internship.dkomshina.repository.TaskRepository;
 
+import javax.transaction.Transactional;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,56 +28,19 @@ public class TaskStageService {
     private final TaskRepository taskRepository;
     private final StageRepository stageRepository;
     private final TaskStageMapper taskStageMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public TaskStageService(TaskRepository taskRepository, StageRepository stageRepository, TaskStageMapper taskStageMapper) {
+    public TaskStageService(TaskRepository taskRepository, StageRepository stageRepository, TaskStageMapper taskStageMapper, ApplicationEventPublisher eventPublisher) {
         this.taskRepository = taskRepository;
         this.stageRepository = stageRepository;
         this.taskStageMapper = taskStageMapper;
+        this.eventPublisher = eventPublisher;
     }
 
-    private void executeCommand(String command) {
-        try {
-            log(command);
-            Process process = Runtime.getRuntime().exec("cmd /c" + command);
-            logOutput(process.getInputStream(), "");
-            logOutput(process.getErrorStream(), "Error: ");
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void logOutput(InputStream inputStream, String prefix) {
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "IBM866"));
-            bufferedReader.lines().forEach(line -> log(prefix + line));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss:SSS");
-
-    private static void log(String message) {
-        System.out.println(format.format(new Date()) + ": " + message);
-    }
-
-    public ResponseEntity<TaskDto> startTask(Long taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new);
-        List<Stage> stages = task.getStages();
-
-        task.setStartTime(new Date());
-        for (Stage stage : stages) {
-            if (stage != null) {
-                stage.setStartTime(new Date());
-                executeCommand(stage.getScript());
-                stage.setEndTime(new Date());
-            }
-        }
-        task.setEndTime(new Date());
-        task.setStages(stages);
-        return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(task)), HttpStatus.OK);
+    public ResponseEntity<?> startTask(Long taskId) {
+        eventPublisher.publishEvent(new TaskStartedEvent(this, taskId));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<TaskDto> createTask(TaskDto taskDto) {

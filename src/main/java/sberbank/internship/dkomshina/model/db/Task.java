@@ -18,7 +18,7 @@ import java.util.List;
 @NonNull
 public class Task {
 
-    @OneToMany(mappedBy = "task", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Stage> stages = new ArrayList<>();
 
     @Id

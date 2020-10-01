@@ -1,17 +1,15 @@
 package sberbank.internship.dkomshina.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sberbank.internship.dkomshina.mapper.TaskStageMapper;
 import sberbank.internship.dkomshina.model.json.resp.TaskDto;
-import sberbank.internship.dkomshina.repository.TaskRepository;
 import sberbank.internship.dkomshina.service.TaskStageService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -25,7 +23,7 @@ public class TaskController {
     }
 
     @PostMapping(value = "{taskId}/start")
-    public ResponseEntity<TaskDto> startTask(@PathVariable Long taskId) {
+    public ResponseEntity<?> startTask(@PathVariable Long taskId) {
         return taskStageService.startTask(taskId);
     }
 
