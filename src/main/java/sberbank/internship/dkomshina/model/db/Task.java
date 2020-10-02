@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import sberbank.internship.dkomshina.util.StatusType;
 
 import javax.persistence.*;
 
@@ -28,6 +29,10 @@ public class Task {
     private String description;
 
     private String name;
+
+    private StatusType status;
+
+    private Integer stageNumber;
 
     private Date createTime;
 

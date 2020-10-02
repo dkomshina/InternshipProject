@@ -5,7 +5,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import sberbank.internship.dkomshina.event.TaskStartedEvent;
+import sberbank.internship.dkomshina.event.StartTaskEvent;
+import sberbank.internship.dkomshina.event.StopTaskEvent;
 import sberbank.internship.dkomshina.mapper.TaskStageMapper;
 import sberbank.internship.dkomshina.model.db.Stage;
 import sberbank.internship.dkomshina.model.db.Task;
@@ -13,11 +14,10 @@ import sberbank.internship.dkomshina.model.json.resp.StageDto;
 import sberbank.internship.dkomshina.model.json.resp.TaskDto;
 import sberbank.internship.dkomshina.repository.StageRepository;
 import sberbank.internship.dkomshina.repository.TaskRepository;
+import sberbank.internship.dkomshina.util.StatusType;
 
-import javax.transaction.Transactional;
-import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -39,12 +39,19 @@ public class TaskStageService {
     }
 
     public ResponseEntity<?> startTask(Long taskId) {
-        eventPublisher.publishEvent(new TaskStartedEvent(this, taskId));
+        eventPublisher.publishEvent(new StartTaskEvent(this, taskId));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> stopTask(Long taskId) {
+        eventPublisher.publishEvent(new StopTaskEvent(this, taskId));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<TaskDto> createTask(TaskDto taskDto) {
         taskDto.setCreateTime(new Date());
+        taskDto.setStageNumber(0);
+        taskDto.setStatus(StatusType.EXIST);
         return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper.map(taskDto))), HttpStatus.CREATED);
     }
 
@@ -59,7 +66,7 @@ public class TaskStageService {
     }
 
     public ResponseEntity<TaskDto> updateTask(Long taskId, TaskDto requestTask) {
-        return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper.map(taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new), requestTask))), HttpStatus.OK);
+        return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(map(taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new), requestTask))), HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteTask(Long taskId) {
@@ -86,13 +93,38 @@ public class TaskStageService {
 
     public ResponseEntity<StageDto> updateStage(
             Long taskId, Long stageId, StageDto stageRequest) {
+        final Task task = taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new);
+        task.setStatus(StatusType.UPDATED);
+        task.setStageNumber(0);
+        taskRepository.save(task);
         return new ResponseEntity<>(taskStageMapper.map(stageRepository
-                .save(taskStageMapper.map(stageRepository.findByTaskIdAndId(taskId, stageId)
+                .save(map(stageRepository.findByTaskIdAndId(taskId, stageId)
                         .orElseThrow(NoSuchElementException::new), stageRequest))), HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteStage(Long taskId, Long stageId) {
         stageRepository.delete(stageRepository.findByTaskIdAndId(taskId, stageId).orElseThrow(NoSuchElementException::new));
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private Task map(Task task, TaskDto taskMappedTo) {
+        task.setName(taskMappedTo.getName());
+        task.setDescription(taskMappedTo.getDescription());
+        task.setStages(taskMappedTo.getStages().stream().map(taskStageMapper::map).collect(Collectors.toList()));
+        task.setStartTime(taskMappedTo.getStartTime());
+        task.setEndTime(taskMappedTo.getEndTime());
+        task.setCreateTime(taskMappedTo.getCreateTime());
+        task.setStatus(StatusType.UPDATED);
+        task.setStageNumber(0);
+        return task;
+    }
+
+    private Stage map(Stage stage, StageDto stageMappedTo) {
+        stage.setName(stageMappedTo.getName());
+        stage.setDescription(stageMappedTo.getDescription());
+        stage.setScript(stageMappedTo.getScript());
+        stage.setStartTime(stageMappedTo.getStartTime());
+        stage.setEndTime(stageMappedTo.getEndTime());
+        return stage;
     }
 }

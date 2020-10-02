@@ -11,6 +11,7 @@ import sberbank.internship.dkomshina.service.TaskStageService;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+//еще один сервис, который останавливает stage а второй, который начинает
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -25,6 +26,11 @@ public class TaskController {
     @PostMapping(value = "{taskId}/start")
     public ResponseEntity<?> startTask(@PathVariable Long taskId) {
         return taskStageService.startTask(taskId);
+    }
+
+    @PostMapping(value = "{taskId}/stop")
+    public ResponseEntity<?> stopTask(@PathVariable Long taskId) {
+        return taskStageService.stopTask(taskId);
     }
 
     @PostMapping

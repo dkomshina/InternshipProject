@@ -1,7 +1,7 @@
 package sberbank.internship.dkomshina.model.db;
 
 import lombok.*;
-import sberbank.internship.dkomshina.util.StageStatusType;
+import sberbank.internship.dkomshina.util.StatusType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -18,8 +18,6 @@ public class Stage {
     private Long id;
 
     private String name;
-
-    private StageStatusType status;
 
     private String script;
 
