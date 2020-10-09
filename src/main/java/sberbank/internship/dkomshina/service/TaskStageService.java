@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import sberbank.internship.dkomshina.event.StartTaskEvent;
 import sberbank.internship.dkomshina.event.StopTaskEvent;
@@ -17,7 +18,6 @@ import sberbank.internship.dkomshina.repository.TaskRepository;
 import sberbank.internship.dkomshina.util.StatusType;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -38,20 +38,20 @@ public class TaskStageService {
         this.eventPublisher = eventPublisher;
     }
 
-    public ResponseEntity<?> startTask(Long taskId) {
+    @Async
+    public void startTask(Long taskId) {
         eventPublisher.publishEvent(new StartTaskEvent(this, taskId));
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> stopTask(Long taskId) {
+    @Async
+    public void stopTask(Long taskId) {
         eventPublisher.publishEvent(new StopTaskEvent(this, taskId));
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<TaskDto> createTask(TaskDto taskDto) {
         taskDto.setCreateTime(new Date());
         taskDto.setStageNumber(0);
-        taskDto.setStatus(StatusType.EXIST);
+        taskDto.setStatus(StatusType.PENDING);
         return new ResponseEntity<>(taskStageMapper.map(taskRepository.save(taskStageMapper.map(taskDto))), HttpStatus.CREATED);
     }
 
@@ -78,6 +78,7 @@ public class TaskStageService {
         final Task task = taskRepository.findById(taskId).orElseThrow(NoSuchElementException::new);
         final Stage stage = taskStageMapper.map(stageDto);
         stage.setTask(task);
+        stage.setStatus(StatusType.PENDING);
         return new ResponseEntity<>(taskStageMapper.map(stageRepository.save(stage)), HttpStatus.CREATED);
     }
 

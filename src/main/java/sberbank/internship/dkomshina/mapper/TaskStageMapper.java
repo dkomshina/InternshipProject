@@ -49,6 +49,7 @@ public class TaskStageMapper {
         stageDto.setScript(stage.getScript());
         stageDto.setStartTime(stage.getStartTime());
         stageDto.setEndTime(stage.getEndTime());
+        stageDto.setStatus(stage.getStatus());
         return stageDto;
     }
 
@@ -60,6 +61,7 @@ public class TaskStageMapper {
         stage.setScript(stageDto.getScript());
         stage.setStartTime(stageDto.getStartTime());
         stage.setEndTime(stageDto.getEndTime());
+        stage.setStatus(stage.getStatus());
         return stage;
     }
 }

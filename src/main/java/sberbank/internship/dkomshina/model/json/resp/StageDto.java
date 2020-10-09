@@ -16,4 +16,5 @@ public class StageDto {
     private Date startTime;
     private Date endTime;
     private TaskDto task;
+    private StatusType status;
 }

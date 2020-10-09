@@ -1,12 +1,12 @@
 package sberbank.internship.dkomshina.util;
 
 public enum StatusType {
-    EXIST,
+    PENDING,
     STARTED,
     RUNNING,
     PAUSED,
     BROKEN,
     UPDATED,
     STOPPED,
-    ENDED
+    COMPLETED
 }

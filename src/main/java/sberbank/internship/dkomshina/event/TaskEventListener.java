@@ -2,7 +2,9 @@ package sberbank.internship.dkomshina.event;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import sberbank.internship.dkomshina.model.db.Stage;
 import sberbank.internship.dkomshina.model.db.Task;
 import sberbank.internship.dkomshina.repository.StageRepository;
@@ -16,12 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-@Component
+@Service
 public class TaskEventListener {
 
     private final TaskRepository taskRepository;
     private final StageRepository stageRepository;
-    private final HashMap<Long, Thread> threadHashMap = new HashMap<>();
+    //concurrency hash map
 
     @Autowired
     public TaskEventListener(TaskRepository taskRepository, StageRepository stageRepository) {
@@ -31,73 +33,40 @@ public class TaskEventListener {
 
     @EventListener
     public void startTask(StartTaskEvent startTaskEvent) {
-        Thread thread = new Thread(() -> {
-            synchronized (this) {
-                Task task = taskRepository.findById(startTaskEvent.getTaskId()).orElseThrow(NoSuchElementException::new);
-                List<Stage> stages = task.getStages();
-                task.setStartTime(new Date());
+        Task task = taskRepository.findById(startTaskEvent.getTaskId()).orElseThrow(NoSuchElementException::new);
+        List<Stage> stages = task.getStages();
+        task.setStartTime(new Date());
+        StatusType taskStatus = StatusType.RUNNING;
+        task.setStatus(taskStatus);
+        taskRepository.save(task);
+        for (int i = task.getStageNumber(); i < stages.size(); i++) {
+            final Stage stage = stages.get(i);
+            if (stage != null) {
+                task.setStageNumber(i);
                 taskRepository.save(task);
-                task.setStatus(StatusType.RUNNING);
-                boolean isStageWorks = true;
-                for (int i = task.getStageNumber();
-                     !Thread.currentThread().isInterrupted() && isStageWorks && i < stages.size(); i++) {
-                    final Stage stage = stages.get(i);
-                    if (stage != null) {
-                        stage.setStartTime(new Date());
-                        task.setStageNumber(i);
-                        stageRepository.save(stage);
-                        isStageWorks = executeCommand(stage.getScript(), task);
-                        stage.setEndTime(new Date());
-                        stageRepository.save(stage);
-                    }
+                taskStatus = executeCommand(stage.getScript(), stage);
+                if(taskStatus == StatusType.STOPPED || taskStatus == StatusType.BROKEN || taskStatus == StatusType.PAUSED){
+                    break;
                 }
-                if (isStageWorks) {
-                    task.setStatus(StatusType.ENDED);
-                    task.setEndTime(new Date());
-                }
-                task.setStages(stages);
-                taskRepository.save(task);
+                //вернуть что-то
+                //условие выхода из stage
+                //хранить процесс Id и останавливать процесс
             }
-        });
-
-        threadHashMap.put(startTaskEvent.getTaskId(), thread);
-        thread.start();
-//        Task task = taskRepository.findById(startTaskEvent.getTaskId()).orElseThrow(NoSuchElementException::new);
-//        List<Stage> stages = task.getStages();
-//        task.setStartTime(new Date());
-//        taskRepository.save(task);
-//        task.setStatus(StatusType.RUNNING);
-//        boolean isStageWorks = true;
-//        for (int i = task.getStageNumber(); isStageWorks && i < stages.size(); i++) {
-//            final Stage stage = stages.get(i);
-//            if (stage != null) {
-//                stage.setStartTime(new Date());
-//                task.setStageNumber(i);
-//                stageRepository.save(stage);
-//                isStageWorks = executeCommand(stage.getScript(), task);
-//                stage.setEndTime(new Date());
-//                stageRepository.save(stage);
-//            }
-//        }
-//        if (isStageWorks) {
-//            task.setStatus(StatusType.ENDED);
-//            task.setEndTime(new Date());
-//        }
-//        task.setStages(stages);
-//        taskRepository.save(task);
-    }
-
-    @EventListener
-    public void stopTask(StopTaskEvent stopTaskEvent) {
-        if (threadHashMap.containsKey(stopTaskEvent.getTaskId())) {
-            threadHashMap.get(stopTaskEvent.getTaskId()).interrupt();
         }
+        task.setStatus(taskStatus);
+        task.setStages(stages);
+        taskRepository.save(task);
     }
 
-    private boolean executeCommand(String command, Task task) {
+    private StatusType executeCommand(String command, Stage stage) {
         try {
             log(command);
+            //todo 'web socket' spring or 'long poling'
             Process process = Runtime.getRuntime().exec("cmd /c" + command);
+            stage.setPid(process.pid());
+            stage.setStartTime(new Date());
+            stage.setStatus(StatusType.RUNNING);
+            stageRepository.save(stage);
 
             InputStream input = process.getInputStream();
             input.mark(1);
@@ -105,17 +74,30 @@ public class TaskEventListener {
             input.reset();
             if (bytesRead != -1) {
                 logOutput(input, "Output: ");
-                process.waitFor();
-                return true;
+                if (process.exitValue() != 0) {
+                    stage.setStatus(StatusType.STOPPED);
+                    stageRepository.save(stage);
+                    return StatusType.STOPPED;
+                }
+            } else {
+                logOutput(process.getErrorStream(), "Error: ");
+                stage.setStatus(StatusType.BROKEN);
+                stageRepository.save(stage);
+                return StatusType.BROKEN;
             }
-            logOutput(process.getErrorStream(), "Error: ");
-            process.waitFor();
-            task.setStatus(StatusType.BROKEN);
-            return false;
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
+        stage.setEndTime(new Date());
+        stage.setStatus(StatusType.COMPLETED);
+        stageRepository.save(stage);
+        return StatusType.COMPLETED;
+    }
+
+    @EventListener
+    public void stopTask(StopTaskEvent stopTaskEvent) {
+        Task task = taskRepository.findById(stopTaskEvent.getTaskId()).orElseThrow(NoSuchElementException::new);
+        ProcessHandle.of(task.getStages().get(task.getStageNumber()).getPid()).ifPresent(ProcessHandle::destroy);
     }
 
     private void logOutput(InputStream inputStream, String prefix) {

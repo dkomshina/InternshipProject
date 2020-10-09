@@ -24,13 +24,13 @@ public class TaskController {
     }
 
     @PostMapping(value = "{taskId}/start")
-    public ResponseEntity<?> startTask(@PathVariable Long taskId) {
-        return taskStageService.startTask(taskId);
+    public void startTask(@PathVariable Long taskId) {
+        taskStageService.startTask(taskId);
     }
 
     @PostMapping(value = "{taskId}/stop")
-    public ResponseEntity<?> stopTask(@PathVariable Long taskId) {
-        return taskStageService.stopTask(taskId);
+    public void stopTask(@PathVariable Long taskId) {
+        taskStageService.stopTask(taskId);
     }
 
     @PostMapping
